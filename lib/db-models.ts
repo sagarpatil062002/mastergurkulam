@@ -143,7 +143,7 @@ export interface Contact {
   email: string
   mobile: string
   message: string
-  type: "general" | "admission" | "exam" | "other"
+  type: "general" | "admission" | "complaint" | "feedback" | "exam" | "other"
   status: "new" | "read" | "replied"
   createdAt: Date
   updatedAt: Date

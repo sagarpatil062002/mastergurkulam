@@ -161,6 +161,7 @@ export default function ContactsAdmin() {
                           value={editForm.name}
                           onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                           className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter full name"
                           required
                         />
                       </div>
@@ -171,6 +172,7 @@ export default function ContactsAdmin() {
                           value={editForm.email}
                           onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                           className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter email address"
                           required
                         />
                       </div>
@@ -181,6 +183,7 @@ export default function ContactsAdmin() {
                           value={editForm.mobile}
                           onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
                           className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter mobile number"
                           required
                         />
                       </div>
@@ -190,6 +193,7 @@ export default function ContactsAdmin() {
                           value={editForm.type}
                           onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
                           className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          title="Select contact type"
                         >
                           <option value="general">General</option>
                           <option value="admission">Admission</option>
@@ -205,6 +209,7 @@ export default function ContactsAdmin() {
                         onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
                         rows={6}
                         className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        placeholder="Enter your message"
                         required
                       />
                     </div>

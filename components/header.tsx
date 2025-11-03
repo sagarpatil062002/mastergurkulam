@@ -8,54 +8,57 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-primary">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-xl">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
+        <Link href="/" className="text-3xl font-bold text-primary hover:scale-105 transition-transform duration-300">
           Master's Gurukulam
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-8 items-center">
-          <Link href="/" className="hover:text-primary transition">
+        <nav className="hidden md:flex gap-10 items-center">
+          <Link href="/" className="text-lg font-medium hover:text-primary transition-all duration-300 hover:scale-110">
             Home
           </Link>
-          <Link href="/about" className="hover:text-primary transition">
+          <Link href="/about" className="text-lg font-medium hover:text-primary transition-all duration-300 hover:scale-110">
             About
           </Link>
-          <Link href="/exams" className="hover:text-primary transition">
+          <Link href="/exams" className="text-lg font-medium hover:text-primary transition-all duration-300 hover:scale-110">
             Exams
           </Link>
-          <Link href="/activities" className="hover:text-primary transition">
+          <Link href="/activities" className="text-lg font-medium hover:text-primary transition-all duration-300 hover:scale-110">
             Activities
           </Link>
-          <Link href="/contact" className="hover:text-primary transition">
+          <Link href="/contact" className="text-lg font-medium hover:text-primary transition-all duration-300 hover:scale-110">
             Contact
           </Link>
         </nav>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        <button
+          className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors duration-300"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="md:hidden bg-card border-t border-border">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+        <nav className="md:hidden bg-white border-t border-gray-200 shadow-2xl animate-slide-down">
+          <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-primary transition-colors duration-300 py-2">
               Home
             </Link>
-            <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-primary transition-colors duration-300 py-2">
               About
             </Link>
-            <Link href="/exams" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/exams" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-primary transition-colors duration-300 py-2">
               Exams
             </Link>
-            <Link href="/activities" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/activities" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-primary transition-colors duration-300 py-2">
               Activities
             </Link>
-            <Link href="/contact" onClick={() => setMobileMenuOpen(false)}>
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-primary transition-colors duration-300 py-2">
               Contact
             </Link>
           </div>
