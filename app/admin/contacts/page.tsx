@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Trash2, Edit2 } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Trash2, Edit2, Search, SortAsc, SortDesc } from "lucide-react"
 import type { Contact } from "@/lib/db-models"
 import AdminLayout from "@/components/AdminLayout"
 
@@ -16,6 +16,9 @@ export default function ContactsAdmin() {
     type: "",
     message: "",
   })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<"name" | "email" | "type" | "createdAt">("createdAt")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   useEffect(() => {
     fetchContacts()
@@ -83,6 +86,56 @@ export default function ContactsAdmin() {
     setEditForm({ name: "", email: "", mobile: "", type: "", message: "" })
   }
 
+  // Filtered and sorted contacts
+  const filteredAndSortedContacts = useMemo(() => {
+    let filtered = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.message.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any
+
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case "email":
+          aValue = a.email.toLowerCase()
+          bValue = b.email.toLowerCase()
+          break
+        case "type":
+          aValue = a.type || ""
+          bValue = b.type || ""
+          break
+        case "createdAt":
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [contacts, searchTerm, sortBy, sortOrder])
+
+  const toggleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("asc")
+    }
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-8">
@@ -95,8 +148,52 @@ export default function ContactsAdmin() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-2xl p-6 border border-gray-100">
               <h3 className="text-xl font-bold text-gray-800 mb-6">All Messages</h3>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {contacts.map((contact) => (
+
+              {/* Search and Sort Controls */}
+              <div className="space-y-4 mb-6">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+
+                {/* Sort Options */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => toggleSort("name")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "name" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                  <button
+                    onClick={() => toggleSort("createdAt")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "createdAt" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Date {sortBy === "createdAt" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                  <button
+                    onClick={() => toggleSort("type")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "type" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Type {sortBy === "type" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-custom">
+                {filteredAndSortedContacts.map((contact) => (
                   <button
                     key={contact._id?.toString()}
                     onClick={() => setSelectedContact(contact)}

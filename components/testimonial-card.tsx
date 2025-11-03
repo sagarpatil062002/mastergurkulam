@@ -3,8 +3,8 @@ import type { Testimonial } from "@/lib/db-models"
 
 export default function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 h-96 flex flex-col">
+      <div className="flex items-center gap-4 mb-6 flex-shrink-0">
         {testimonial.image ? (
           <img
             src={testimonial.image || "/placeholder.svg"}
@@ -22,12 +22,14 @@ export default function TestimonialCard({ testimonial }: { testimonial: Testimon
           <p className="text-sm text-gray-600 font-medium">{testimonial.course}</p>
         </div>
       </div>
-      <div className="flex gap-1 mb-4">
+      <div className="flex gap-1 mb-4 flex-shrink-0">
         {Array.from({ length: testimonial.rating }).map((_, i) => (
           <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
         ))}
       </div>
-      <p className="text-gray-700 leading-relaxed text-lg italic">"{testimonial.message}"</p>
+      <div className="flex-1 overflow-hidden">
+        <p className="text-gray-700 leading-relaxed text-lg italic overflow-y-auto scrollbar-custom max-h-40">"{testimonial.message}"</p>
+      </div>
     </div>
   )
 }

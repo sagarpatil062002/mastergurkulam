@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Download, Edit2, Trash2, CheckCircle, XCircle } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Download, Edit2, Trash2, CheckCircle, XCircle, Search, SortAsc, SortDesc } from "lucide-react"
 import type { ExamRegistration } from "@/lib/db-models"
 import AdminLayout from "@/components/AdminLayout"
 
@@ -19,6 +19,9 @@ export default function ExamRegistrationsAdmin() {
     language: "",
     paymentStatus: "pending" as "pending" | "completed" | "failed" | "pending_cash",
   })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<"name" | "email" | "paymentStatus" | "createdAt">("createdAt")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   useEffect(() => {
     fetchRegistrations()
@@ -34,13 +37,66 @@ export default function ExamRegistrationsAdmin() {
     }
   }
 
-  const filteredRegistrations =
-    filterPaymentStatus === "all" ? registrations : registrations.filter((r) => r.paymentStatus === filterPaymentStatus)
+  // Filtered and sorted registrations
+  const filteredAndSortedRegistrations = useMemo(() => {
+    let filtered = registrations.filter(registration =>
+      registration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      registration.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      registration.mobile.includes(searchTerm) ||
+      registration.registrationNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      registration.paymentStatus.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    // Apply payment status filter
+    if (filterPaymentStatus !== "all") {
+      filtered = filtered.filter((r) => r.paymentStatus === filterPaymentStatus)
+    }
+
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any
+
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case "email":
+          aValue = a.email.toLowerCase()
+          bValue = b.email.toLowerCase()
+          break
+        case "paymentStatus":
+          aValue = a.paymentStatus
+          bValue = b.paymentStatus
+          break
+        case "createdAt":
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [registrations, searchTerm, filterPaymentStatus, sortBy, sortOrder])
+
+  const toggleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("asc")
+    }
+  }
 
   const exportToCSV = () => {
     const csv = [
       ["Name", "Email", "Mobile", "Registration Number", "Payment Status", "Date"].join(","),
-      ...filteredRegistrations.map((r) =>
+      ...filteredAndSortedRegistrations.map((r) =>
         [
           r.name,
           r.email,
@@ -158,22 +214,69 @@ export default function ExamRegistrationsAdmin() {
         </div>
 
         <div className="bg-white rounded-xl shadow-2xl p-6 border border-gray-100">
-          <div className="flex items-center gap-4 mb-6">
-            <label className="text-sm font-semibold text-gray-700">Filter by Payment Status:</label>
-            <select
-              value={filterPaymentStatus}
-              onChange={(e) => setFilterPaymentStatus(e.target.value)}
-              className="border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-            >
-              <option value="all">All Registrations</option>
-              <option value="pending">Pending (Gateway)</option>
-              <option value="pending_cash">Pending (Cash)</option>
-              <option value="completed">Completed</option>
-              <option value="failed">Failed</option>
-            </select>
+          {/* Search and Sort Controls */}
+          <div className="space-y-4 mb-6">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search registrations..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+
+            {/* Filters and Sort */}
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700">Payment Status:</label>
+                <select
+                  value={filterPaymentStatus}
+                  onChange={(e) => setFilterPaymentStatus(e.target.value)}
+                  className="border-2 border-gray-200 rounded-lg px-4 py-2 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  title="Filter by payment status"
+                >
+                  <option value="all">All Registrations</option>
+                  <option value="pending">Pending (Gateway)</option>
+                  <option value="pending_cash">Pending (Cash)</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+
+              {/* Sort Options */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => toggleSort("name")}
+                  className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                    sortBy === "name" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                </button>
+                <button
+                  onClick={() => toggleSort("createdAt")}
+                  className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                    sortBy === "createdAt" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Date {sortBy === "createdAt" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                </button>
+                <button
+                  onClick={() => toggleSort("paymentStatus")}
+                  className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                    sortBy === "paymentStatus" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  Status {sortBy === "paymentStatus" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-hidden rounded-xl border border-gray-200 max-h-96 overflow-y-auto scrollbar-custom">
             <table className="w-full">
               <thead className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b border-gray-200">
                 <tr>
@@ -186,7 +289,7 @@ export default function ExamRegistrationsAdmin() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRegistrations.map((reg) => (
+                {filteredAndSortedRegistrations.map((reg) => (
                   <tr
                     key={reg._id?.toString()}
                     className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-primary/5 hover:to-secondary/5 transition-all duration-300 ${

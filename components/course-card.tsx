@@ -10,8 +10,8 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, onApply }: CourseCardProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 group">
-      <div className="h-56 bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-sm text-muted relative overflow-hidden">
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 group h-[28rem] flex flex-col">
+      <div className="h-56 bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-sm text-muted relative overflow-hidden flex-shrink-0">
         {course.image ? (
           <img
             src={course.image || "/placeholder.svg"}
@@ -28,15 +28,19 @@ export default function CourseCard({ course, onApply }: CourseCardProps) {
           </div>
         )}
       </div>
-      <div className="p-8">
-        <h3 className="text-2xl font-bold mb-3 text-primary">{course.title}</h3>
-        <p className="text-gray-600 mb-3 font-medium">Duration: {course.duration}</p>
-        <p className="text-sm text-gray-500 mb-8 leading-relaxed">{course.description}</p>
+      <div className="p-6 flex-1 flex flex-col min-h-0">
+        <h3 className="text-xl font-bold mb-2 text-primary flex-shrink-0">{course.title}</h3>
+        <p className="text-gray-600 mb-2 font-medium text-sm flex-shrink-0">Duration: {course.duration}</p>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm text-gray-500 leading-relaxed overflow-y-auto scrollbar-custom max-h-32">
+            {course.description}
+          </p>
+        </div>
         <button
           onClick={() => onApply(course)}
-          className="w-full bg-linear-to-r from-primary to-secondary text-white py-4 rounded-xl font-bold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transform hover:scale-105"
+          className="w-full bg-linear-to-r from-primary to-secondary text-white py-3 rounded-xl font-bold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105 mt-4 flex-shrink-0"
         >
-          Apply Now <ArrowRight size={18} />
+          Apply Now <ArrowRight size={16} />
         </button>
       </div>
     </div>
