@@ -48,7 +48,8 @@ export default function FacilitiesAdmin() {
         setFormData({ title: "", description: "", image: "", order: 1 })
         setShowForm(false)
         setEditingId(null)
-        fetchFacilities()
+        await fetchFacilities()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -71,7 +72,8 @@ export default function FacilitiesAdmin() {
     try {
       const response = await fetch(`/api/facilities/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchFacilities()
+        await fetchFacilities()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)

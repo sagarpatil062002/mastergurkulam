@@ -3,12 +3,13 @@ import { getCollection } from "@/lib/mongodb"
 import type { Exam } from "@/lib/db-models"
 import { ObjectId } from "mongodb"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const data = await request.json()
     const exams = await getCollection<Exam>("exams")
 
-    const result = await exams.updateOne({ _id: new ObjectId(params.id) }, { $set: { ...data, updatedAt: new Date() } })
+    const result = await exams.updateOne({ _id: new ObjectId(id) }, { $set: { ...data, updatedAt: new Date() } })
 
     return NextResponse.json({ modifiedCount: result.modifiedCount })
   } catch (error) {
@@ -17,10 +18,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const exams = await getCollection<Exam>("exams")
-    const result = await exams.deleteOne({ _id: new ObjectId(params.id) })
+    const result = await exams.deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ deletedCount: result.deletedCount })
   } catch (error) {

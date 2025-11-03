@@ -22,6 +22,8 @@ export async function POST(request: NextRequest) {
     // Generate registration number
     const registrationNumber = `REG-${exam_id.toString().slice(0, 8)}-${Date.now()}`
 
+    const paymentMethod = formData.get("paymentMethod") as string || "gateway"
+
     const result = await registrations.insertOne({
       exam_id,
       name: formData.get("name") as string,
@@ -30,7 +32,9 @@ export async function POST(request: NextRequest) {
       dob: formData.get("dob") as string,
       center: formData.get("center") as string,
       language: formData.get("language") as string,
-      paymentStatus: "pending",
+      examFee: parseInt(formData.get("examFee") as string) || exam.examFee,
+      paymentStatus: paymentMethod === "gateway" ? "pending" : "pending_cash",
+      paymentMethod,
       confirmationEmailSent: false,
       registrationNumber,
       createdAt: new Date(),

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { LogOut, Menu, X } from "lucide-react"
 
@@ -14,10 +14,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [email, setEmail] = useState("")
 
-  // Get email from localStorage on client side
-  if (typeof window !== "undefined" && !email) {
-    setEmail(localStorage.getItem("adminEmail") || "")
-  }
+  useEffect(() => {
+    // Get email from localStorage on client side
+    const adminEmail = localStorage.getItem("adminEmail") || ""
+    setEmail(adminEmail)
+  }, [])
 
   const handleLogout = () => {
     localStorage.removeItem("adminEmail")
@@ -26,6 +27,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   const menuItems = [
+    { label: "Dashboard", href: "/admin", icon: "🏠" },
+    { label: "Admin Users", href: "/admin/admin-users", icon: "👥" },
+    { label: "Email Templates", href: "/admin/email-templates", icon: "📧" },
     { label: "Courses", href: "/admin/courses", icon: "📚" },
     { label: "Faculty", href: "/admin/faculty", icon: "👨‍🏫" },
     { label: "Facilities", href: "/admin/facilities", icon: "🏫" },

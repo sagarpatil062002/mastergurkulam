@@ -62,7 +62,8 @@ export default function ActivitiesAdmin() {
         })
         setShowForm(false)
         setEditingId(null)
-        fetchActivities()
+        await fetchActivities()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -88,7 +89,8 @@ export default function ActivitiesAdmin() {
     try {
       const response = await fetch(`/api/activities/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchActivities()
+        await fetchActivities()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)

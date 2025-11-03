@@ -96,9 +96,14 @@ export interface ExamRegistration {
   language: string
   idProof?: string
   documents?: string[]
-  paymentStatus: "pending" | "completed" | "failed"
+  paymentStatus: "pending" | "completed" | "failed" | "pending_cash"
+  paymentMethod?: "gateway" | "cash"
   confirmationEmailSent: boolean
   registrationNumber: string
+  examFee?: number // Add examFee field
+  razorpayOrderId?: string
+  razorpayPaymentId?: string
+  paymentVerifiedAt?: Date
   createdAt: Date
   updatedAt: Date
 }
@@ -156,13 +161,32 @@ export interface AdminUser {
   updatedAt: Date
 }
 
+// Exam Result Model
+export interface ExamResult {
+  _id?: ObjectId
+  exam_id: ObjectId
+  registrationNumber: string
+  studentName: string
+  email: string
+  marks: number
+  totalMarks: number
+  percentage: number
+  grade: string
+  status: "pass" | "fail" | "absent"
+  resultFile?: string // URL to result PDF/Excel
+  answerBookFile?: string // URL to answer book PDF
+  publishedAt: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
 // Email Template Model
 export interface EmailTemplate {
   _id?: ObjectId
   name: string
   subject: string
   body: string
-  type: "registration" | "confirmation" | "admission" | "grievance" | "admit_card"
+  type: "registration" | "confirmation" | "admission" | "grievance" | "admit_card" | "result"
   variables: string[] // e.g., ['name', 'email', 'registrationNumber']
   createdAt: Date
   updatedAt: Date

@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
+import Recaptcha from "@/components/recaptcha"
 import { Mail, Phone, MapPin, Clock, Facebook, Youtube, Instagram, Twitter } from "lucide-react"
 
 export default function Contact() {
@@ -17,9 +18,16 @@ export default function Contact() {
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!recaptchaToken) {
+      alert("Please complete the reCAPTCHA verification")
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch("/api/contacts", {
@@ -30,6 +38,7 @@ export default function Contact() {
       if (response.ok) {
         setSubmitted(true)
         setFormData({ name: "", email: "", mobile: "", type: "general", message: "" })
+        setRecaptchaToken(null)
         setTimeout(() => setSubmitted(false), 5000)
       }
     } catch (error) {
@@ -192,9 +201,18 @@ export default function Contact() {
                       required
                     />
                   </div>
+
+                  {/* reCAPTCHA */}
+                  <div className="flex justify-center">
+                    <Recaptcha
+                      onVerify={setRecaptchaToken}
+                      onExpired={() => setRecaptchaToken(null)}
+                    />
+                  </div>
+
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !recaptchaToken}
                     className="w-full bg-gradient-to-r from-primary to-secondary text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 disabled:opacity-50 transform hover:scale-105 transition-all duration-300 shadow-lg"
                   >
                     {loading ? "📤 Sending Message..." : "📤 Send Message"}

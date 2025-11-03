@@ -178,6 +178,8 @@ export default function AdminHome() {
 
 function Nav() {
   const menuItems = [
+    { label: "Admin Users", href: "/admin/admin-users", icon: "👥" },
+    { label: "Email Templates", href: "/admin/email-templates", icon: "📧" },
     { label: "Courses", href: "/admin/courses", icon: "📚" },
     { label: "Faculty", href: "/admin/faculty", icon: "👨‍🏫" },
     { label: "Facilities", href: "/admin/facilities", icon: "🏫" },

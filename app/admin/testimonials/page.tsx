@@ -50,7 +50,8 @@ export default function TestimonialsAdmin() {
         setFormData({ name: "", course: "", message: "", image: "", rating: 5, order: 1 })
         setShowForm(false)
         setEditingId(null)
-        fetchTestimonials()
+        await fetchTestimonials()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -75,7 +76,8 @@ export default function TestimonialsAdmin() {
     try {
       const response = await fetch(`/api/testimonials/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchTestimonials()
+        await fetchTestimonials()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)

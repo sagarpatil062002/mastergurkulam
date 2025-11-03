@@ -50,7 +50,8 @@ export default function FacultyAdmin() {
         setFormData({ name: "", subject: "", qualification: "", bio: "", image: "", order: 1 })
         setShowForm(false)
         setEditingId(null)
-        fetchFaculty()
+        await fetchFaculty()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -75,7 +76,8 @@ export default function FacultyAdmin() {
     try {
       const response = await fetch(`/api/faculty/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchFaculty()
+        await fetchFaculty()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)

@@ -47,7 +47,8 @@ export default function VideosAdmin() {
         setFormData({ title: "", url: "", type: "youtube" })
         setShowForm(false)
         setEditingId(null)
-        fetchVideos()
+        await fetchVideos()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -69,7 +70,8 @@ export default function VideosAdmin() {
     try {
       const response = await fetch(`/api/videos/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchVideos()
+        await fetchVideos()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)
@@ -130,12 +132,17 @@ export default function VideosAdmin() {
             </label>
             <input
               type="url"
-              placeholder={formData.type === "youtube" ? "https://www.youtube.com/watch?v=..." : "https://example.com/video.mp4"}
+              placeholder={formData.type === "youtube" ? "https://youtu.be/... or https://www.youtube.com/watch?v=..." : "https://example.com/video.mp4"}
               value={formData.url}
               onChange={(e) => setFormData({ ...formData, url: e.target.value })}
               className="w-full border-2 border-border rounded-xl px-6 py-4 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               required
             />
+            {formData.type === "youtube" && (
+              <p className="text-sm text-muted-foreground mt-2">
+                💡 YouTube URLs can be in formats like: https://youtu.be/JosejdzqoRk or https://www.youtube.com/watch?v=JosejdzqoRk
+              </p>
+            )}
           </div>
           <div className="flex gap-4 pt-4">
             <button

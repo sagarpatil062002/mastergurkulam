@@ -25,6 +25,24 @@ interface EnquiryFormData {
   selectedCourse: string
 }
 
+// Helper function to extract YouTube video ID from various URL formats
+function getYouTubeVideoId(url: string): string {
+  // Handle youtu.be format: https://youtu.be/JosejdzqoRk?si=Lq9j-FFXQMX12xxO
+  const youtuBeMatch = url.match(/youtu\.be\/([a-zA-Z0-9_-]+)/)
+  if (youtuBeMatch) {
+    return youtuBeMatch[1]
+  }
+
+  // Handle youtube.com format: https://www.youtube.com/watch?v=JosejdzqoRk
+  const youtubeMatch = url.match(/[?&]v=([a-zA-Z0-9_-]+)/)
+  if (youtubeMatch) {
+    return youtubeMatch[1]
+  }
+
+  // If no match found, return the original URL (fallback)
+  return url
+}
+
 export default function Home() {
   const [courses, setCourses] = useState<Course[]>([])
   const [facilities, setFacilities] = useState<Facility[]>([])
@@ -103,7 +121,7 @@ export default function Home() {
           <div className="absolute inset-0">
             {heroVideo.type === "youtube" ? (
               <iframe
-                src={`https://www.youtube.com/embed/${heroVideo.url.split('v=')[1]}?autoplay=1&mute=1&loop=1&playlist=${heroVideo.url.split('v=')[1]}&controls=0&showinfo=0&modestbranding=1`}
+                src={`https://www.youtube.com/embed/${getYouTubeVideoId(heroVideo.url)}?autoplay=1&mute=1&loop=1&playlist=${getYouTubeVideoId(heroVideo.url)}&controls=0&showinfo=0&modestbranding=1`}
                 className="w-full h-full object-cover"
                 allow="autoplay; encrypted-media"
                 allowFullScreen
@@ -242,12 +260,12 @@ export default function Home() {
               <p className="text-sm opacity-90">Check exam schedules</p>
             </a>
             <a
-              href="/about"
+              href="/success-stories"
               className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-center hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
             >
-              <div className="text-4xl mb-4">🏫</div>
-              <h3 className="font-bold text-lg mb-2">About Us</h3>
-              <p className="text-sm opacity-90">Learn about our institute</p>
+              <div className="text-4xl mb-4">🌟</div>
+              <h3 className="font-bold text-lg mb-2">Success Stories</h3>
+              <p className="text-sm opacity-90">Inspiring student journeys</p>
             </a>
           </div>
         </div>

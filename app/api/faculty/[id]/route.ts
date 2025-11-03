@@ -3,13 +3,14 @@ import { getCollection } from "@/lib/mongodb"
 import type { Faculty } from "@/lib/db-models"
 import { ObjectId } from "mongodb"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const data = await request.json()
     const faculty = await getCollection<Faculty>("faculty")
 
     const result = await faculty.updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: { ...data, updatedAt: new Date() } },
     )
 
@@ -20,10 +21,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const faculty = await getCollection<Faculty>("faculty")
-    const result = await faculty.deleteOne({ _id: new ObjectId(params.id) })
+    const result = await faculty.deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ deletedCount: result.deletedCount })
   } catch (error) {

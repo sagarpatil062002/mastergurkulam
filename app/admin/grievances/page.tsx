@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { CheckCircle, AlertCircle, Clock } from "lucide-react"
+import { CheckCircle, AlertCircle, Clock, Trash2 } from "lucide-react"
 import type { Grievance } from "@/lib/db-models"
 import AdminLayout from "@/components/AdminLayout"
 
@@ -34,7 +34,8 @@ export default function GrievancesAdmin() {
       })
 
       if (response.ok) {
-        fetchGrievances()
+        await fetchGrievances()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Update error:", error)
@@ -51,6 +52,21 @@ export default function GrievancesAdmin() {
         return <CheckCircle className="text-green-500" size={20} />
       default:
         return null
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this grievance?")) return
+    try {
+      const response = await fetch(`/api/grievances/${id}`, { method: "DELETE" })
+      if (response.ok) {
+        await fetchGrievances()
+        setSelectedGrievance(null)
+        setReplyText("")
+        window.location.reload() // Force page refresh after CRUD operation
+      }
+    } catch (error) {
+      console.error("Delete error:", error)
     }
   }
 
@@ -85,6 +101,17 @@ export default function GrievancesAdmin() {
 
       {selectedGrievance && (
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-xl font-bold">Grievance Details</h3>
+            <button
+              onClick={() => handleDelete(selectedGrievance._id?.toString() || "")}
+              className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition"
+              title="Delete Grievance"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+
           <div>
             <p className="text-sm text-muted-foreground">Status</p>
             <select
@@ -135,7 +162,8 @@ export default function GrievancesAdmin() {
                   })
                   if (response.ok) {
                     setReplyText("")
-                    fetchGrievances()
+                    await fetchGrievances()
+                    window.location.reload() // Force page refresh after CRUD operation
                   }
                 } catch (error) {
                   console.error("Reply error:", error)

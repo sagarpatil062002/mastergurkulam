@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Mail, Phone, MapPin } from "lucide-react"
+import NewsletterSignup from "./newsletter-signup"
 
 export default function Footer() {
   return (
@@ -24,6 +25,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/success-stories" className="hover:opacity-100">
+                  Success Stories
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="hover:opacity-100">
                   Contact Us
                 </Link>
@@ -45,6 +51,12 @@ export default function Footer() {
             </div>
           </div>
         </div>
+
+        {/* Newsletter Signup */}
+        <div className="max-w-md mx-auto mb-8">
+          <NewsletterSignup />
+        </div>
+
         <div className="border-t border-primary-foreground/20 pt-8 text-center opacity-75">
           <p>&copy; 2025 Master's Gurukulam. All rights reserved.</p>
         </div>

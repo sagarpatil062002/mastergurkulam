@@ -2,14 +2,14 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
 
-export default function RegistrationSuccess() {
+function RegistrationSuccessContent() {
   const searchParams = useSearchParams()
   const registrationNumber = searchParams.get("reg")
   const [registrationData, setRegistrationData] = useState<any>(null)
@@ -152,8 +152,14 @@ export default function RegistrationSuccess() {
                   </div>
                   <div className="flex justify-between">
                     <span className="font-semibold">Payment Status:</span>
-                    <span className={`font-bold ${registrationData.paymentStatus === 'completed' ? 'text-green-600' : 'text-yellow-600'}`}>
-                      {registrationData.paymentStatus}
+                    <span className={`font-bold ${
+                      registrationData.paymentStatus === 'completed' ? 'text-green-600' :
+                      registrationData.paymentStatus === 'pending' ? 'text-yellow-600' :
+                      registrationData.paymentStatus === 'pending_cash' ? 'text-orange-600' : 'text-red-600'
+                    }`}>
+                      {registrationData.paymentStatus === 'pending_cash' ? 'Pending (Cash Payment)' :
+                       registrationData.paymentStatus === 'pending' ? 'Pending (Online Payment)' :
+                       registrationData.paymentStatus}
                     </span>
                   </div>
                 </div>
@@ -207,6 +213,7 @@ export default function RegistrationSuccess() {
                 <li>• Please arrive at the exam center 30 minutes before the scheduled time</li>
                 <li>• Bring this confirmation slip and a valid ID proof</li>
                 <li>• Electronic devices are not allowed in the exam hall</li>
+                <li>• Hall ticket will be available 7 days before the exam date</li>
                 <li>• For any queries, contact us at support@mastersgurukulam.com</li>
                 <li>• Keep this registration number safe for future reference</li>
               </ul>
@@ -240,5 +247,24 @@ export default function RegistrationSuccess() {
 
       <Footer />
     </div>
+  )
+}
+
+export default function RegistrationSuccess() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-lg text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <RegistrationSuccessContent />
+    </Suspense>
   )
 }

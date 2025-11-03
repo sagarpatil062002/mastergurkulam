@@ -3,10 +3,11 @@ import { getCollection } from "@/lib/mongodb"
 import type { Activity } from "@/lib/db-models"
 import { ObjectId } from "mongodb"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const activities = await getCollection<Activity>("activities")
-    const result = await activities.findOne({ _id: new ObjectId(params.id) })
+    const result = await activities.findOne({ _id: new ObjectId(id) })
 
     if (!result) {
       return NextResponse.json({ error: "Activity not found" }, { status: 404 })
@@ -19,13 +20,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const data = await request.json()
     const activities = await getCollection<Activity>("activities")
 
     const result = await activities.updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       {
         $set: {
           ...data,
@@ -41,10 +43,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const activities = await getCollection<Activity>("activities")
-    const result = await activities.deleteOne({ _id: new ObjectId(params.id) })
+    const result = await activities.deleteOne({ _id: new ObjectId(id) })
 
     return NextResponse.json({ deletedCount: result.deletedCount })
   } catch (error) {

@@ -59,7 +59,8 @@ export default function ExamsAdmin() {
         })
         setShowForm(false)
         setEditingId(null)
-        fetchExams()
+        await fetchExams()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -85,7 +86,8 @@ export default function ExamsAdmin() {
     try {
       const response = await fetch(`/api/exams/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchExams()
+        await fetchExams()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)

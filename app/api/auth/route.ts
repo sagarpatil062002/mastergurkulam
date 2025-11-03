@@ -1,8 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getCollection } from "@/lib/mongodb"
 import type { AdminUser } from "@/lib/db-models"
+import bcrypt from "bcryptjs"
 
-// Simplified authentication (replace with proper NextAuth for production)
 export async function POST(request: NextRequest) {
   try {
     const { email, password, action } = await request.json()
@@ -15,8 +15,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
       }
 
-      // Note: In production, use bcrypt for password hashing
-      if (admin.password !== password) {
+      // Verify password with bcrypt
+      const isValidPassword = await bcrypt.compare(password, admin.password)
+      if (!isValidPassword) {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
       }
 

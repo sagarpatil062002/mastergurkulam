@@ -49,7 +49,8 @@ export default function CoursesAdmin() {
         setFormData({ title: "", duration: "", description: "", image: "", order: 1 })
         setShowForm(false)
         setEditingId(null)
-        fetchCourses()
+        await fetchCourses()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Submit error:", error)
@@ -73,7 +74,8 @@ export default function CoursesAdmin() {
     try {
       const response = await fetch(`/api/courses/${id}`, { method: "DELETE" })
       if (response.ok) {
-        fetchCourses()
+        await fetchCourses()
+        window.location.reload() // Force page refresh after CRUD operation
       }
     } catch (error) {
       console.error("Delete error:", error)
