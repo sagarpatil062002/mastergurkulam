@@ -124,7 +124,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-24 md:pb-0">
       <Suspense fallback={<div className="h-16 bg-white shadow-sm animate-pulse" />}>
         <Header />
       </Suspense>
