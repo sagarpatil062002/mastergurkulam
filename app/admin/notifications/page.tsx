@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Plus, Edit, Trash2, AlertCircle, CheckCircle, Info, AlertTriangle } from "lucide-react"
 import type { Notification } from "@/lib/db-models"
+import AdminLayout from "@/components/AdminLayout"
 
 export default function NotificationsAdmin() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -127,7 +128,8 @@ export default function NotificationsAdmin() {
   }
 
   return (
-    <div className="space-y-8">
+    <AdminLayout>
+      <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">Notification Management</h2>
@@ -287,6 +289,36 @@ export default function NotificationsAdmin() {
           )}
         </div>
       </div>
-    </div>
+
+      {/* Notification Preview */}
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-100">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-bold text-primary">Live Preview</h3>
+          <p className="text-sm text-gray-600 mt-1">How notifications appear on the website</p>
+        </div>
+        <div className="p-6">
+          <div className="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-lg shadow-lg">
+            <div className="flex items-start gap-3">
+              <div className="text-2xl">📢</div>
+              <div className="flex-1">
+                <h4 className="font-bold text-lg mb-1">Sample Notification Title</h4>
+                <p className="text-sm opacity-90">This is how your notification will appear to website visitors. It includes important announcements, updates, or alerts.</p>
+                <div className="flex items-center gap-4 mt-3 text-xs opacity-75">
+                  <span>Active until: {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                  <button className="text-white underline hover:no-underline">Dismiss</button>
+                </div>
+              </div>
+              <button className="text-white hover:text-gray-200 text-xl">×</button>
+            </div>
+          </div>
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">
+              <strong>Note:</strong> Notifications appear at the top of all pages when active. Users can dismiss them, but they will reappear on next visit if still active.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </AdminLayout>
   )
 }

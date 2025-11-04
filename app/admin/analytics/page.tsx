@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { BarChart3, Users, FileText, CreditCard, TrendingUp, Eye, MousePointer, Clock } from "lucide-react"
+import AdminLayout from "@/components/AdminLayout"
 
 interface AnalyticsData {
   totalUsers: number
@@ -84,65 +85,70 @@ export default function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
-            <p className="text-gray-600 mt-2">Loading analytics data...</p>
+      <AdminLayout>
+        <div className="space-y-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
+              <p className="text-gray-600 mt-2">Loading analytics data...</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                  <div className="h-8 bg-gray-200 rounded w-16"></div>
-                </div>
-                <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      </AdminLayout>
     )
   }
 
   if (!analyticsData) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-xl font-bold mb-2">Analytics Unavailable</h3>
-          <p>Please check your Google Analytics configuration.</p>
+      <AdminLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-6xl mb-4">📊</div>
+            <h3 className="text-xl font-bold mb-2">Analytics Unavailable</h3>
+            <p>Please check your Google Analytics configuration.</p>
+          </div>
         </div>
-      </div>
+      </AdminLayout>
     )
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
-          <p className="text-gray-600 mt-2">Track user behavior and website performance</p>
+    <AdminLayout>
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800">Analytics Dashboard</h2>
+            <p className="text-gray-600 mt-2">Track user behavior and website performance</p>
+          </div>
+          <div className="flex gap-2">
+            {["7d", "30d", "90d"].map((range) => (
+              <button
+                key={range}
+                onClick={() => setTimeRange(range as "7d" | "30d" | "90d")}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  timeRange === range
+                    ? "bg-primary text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "90 Days"}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-2">
-          {["7d", "30d", "90d"].map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range as "7d" | "30d" | "90d")}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                timeRange === range
-                  ? "bg-primary text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              {range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "90 Days"}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -289,7 +295,62 @@ export default function AnalyticsDashboard() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Real-time Activity Feed */}
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-100">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-bold text-primary">Real-time Activity</h3>
+          <p className="text-sm text-gray-600 mt-1">Live user interactions and system events</p>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <ActivityItem
+              icon="👤"
+              action="New user registration"
+              details="Rahul Sharma registered for UPSC Prelims 2025"
+              time="2 minutes ago"
+              type="success"
+            />
+            <ActivityItem
+              icon="📧"
+              action="Email sent"
+              details="Hall ticket email sent to priya.patel@example.com"
+              time="5 minutes ago"
+              type="info"
+            />
+            <ActivityItem
+              icon="💰"
+              action="Payment received"
+              details="₹100 payment verified for REG-SSC-001-2025"
+              time="12 minutes ago"
+              type="success"
+            />
+            <ActivityItem
+              icon="📝"
+              action="Form submission"
+              details="Contact form submitted by amit.kumar@example.com"
+              time="18 minutes ago"
+              type="info"
+            />
+            <ActivityItem
+              icon="⚠️"
+              action="Grievance filed"
+              details="New grievance submitted for exam registration"
+              time="25 minutes ago"
+              type="warning"
+            />
+            <ActivityItem
+              icon="📊"
+              action="Result uploaded"
+              details="Exam results uploaded for UPSC Prelims 2025"
+              time="1 hour ago"
+              type="success"
+            />
+          </div>
+        </div>
+      </div>
+      </div>
+    </AdminLayout>
   )
 }
 
@@ -320,6 +381,40 @@ function MetricCard({
         </div>
         <div className="p-3 bg-gray-50 rounded-lg">
           {icon}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ActivityItem({
+  icon,
+  action,
+  details,
+  time,
+  type
+}: {
+  icon: string
+  action: string
+  details: string
+  time: string
+  type: 'success' | 'info' | 'warning' | 'error'
+}) {
+  const typeColors = {
+    success: 'bg-green-100 border-green-200 text-green-800',
+    info: 'bg-blue-100 border-blue-200 text-blue-800',
+    warning: 'bg-yellow-100 border-yellow-200 text-yellow-800',
+    error: 'bg-red-100 border-red-200 text-red-800'
+  }
+
+  return (
+    <div className={`p-4 rounded-lg border ${typeColors[type]} hover:shadow-md transition-all duration-300`}>
+      <div className="flex items-start gap-3">
+        <span className="text-xl">{icon}</span>
+        <div className="flex-1">
+          <p className="font-semibold text-sm">{action}</p>
+          <p className="text-xs opacity-75 mt-1">{details}</p>
+          <p className="text-xs opacity-60 mt-2">{time}</p>
         </div>
       </div>
     </div>

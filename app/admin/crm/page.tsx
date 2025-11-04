@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Settings, Users, DollarSign, CheckCircle, XCircle, AlertCircle, RefreshCw } from "lucide-react"
+import AdminLayout from "@/components/AdminLayout"
 
 interface CRMConfig {
   provider: 'hubspot' | 'salesforce' | 'zoho' | 'pipedrive' | 'custom'
@@ -161,7 +162,8 @@ export default function CRMAdmin() {
   const providerInfo = getProviderInfo(config.provider)
 
   return (
-    <div className="space-y-8">
+    <AdminLayout>
+      <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">CRM Integration</h2>
@@ -220,6 +222,20 @@ export default function CRMAdmin() {
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-xl font-bold text-primary">CRM Configuration</h3>
           <p className="text-sm text-gray-600 mt-1">Configure your CRM integration settings</p>
+        </div>
+        <div className="p-6">
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Settings className="text-blue-600 mt-1" size={20} />
+              <div>
+                <h4 className="font-semibold text-blue-800 mb-2">CRM Integration Status</h4>
+                <p className="text-blue-700 text-sm">
+                  CRM integration allows you to automatically sync contacts, deals, and activities from your website to your CRM system.
+                  Currently showing mock data for demonstration.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="p-6 space-y-6">
           {/* Enable/Disable */}
@@ -370,7 +386,55 @@ export default function CRMAdmin() {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Recent CRM Activities */}
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-100">
+        <div className="p-6 border-b border-gray-200">
+          <h3 className="text-xl font-bold text-primary">Recent CRM Activities</h3>
+          <p className="text-sm text-gray-600 mt-1">Latest contacts and deals synced</p>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            <CRMActivity
+              icon="👤"
+              title="New Contact Added"
+              description="Rahul Sharma - UPSC Prelims 2025 registration"
+              time="2 hours ago"
+              type="contact"
+            />
+            <CRMActivity
+              icon="💰"
+              title="Deal Created"
+              description="₹100 - UPSC Prelims Registration - REG-UPSC-001-2025"
+              time="2 hours ago"
+              type="deal"
+            />
+            <CRMActivity
+              icon="📧"
+              title="Contact Updated"
+              description="Priya Patel - Payment completed for SSC CGL"
+              time="4 hours ago"
+              type="update"
+            />
+            <CRMActivity
+              icon="📞"
+              title="Lead Generated"
+              description="Amit Kumar - Course enquiry for UPSC Civil Services"
+              time="6 hours ago"
+              type="lead"
+            />
+            <CRMActivity
+              icon="⚠️"
+              title="Grievance Logged"
+              description="Issue reported for exam registration process"
+              time="8 hours ago"
+              type="issue"
+            />
+          </div>
+        </div>
+      </div>
+      </div>
+    </AdminLayout>
   )
 }
 
@@ -401,6 +465,41 @@ function StatCard({
         </div>
         <div className="p-3 bg-gray-50 rounded-lg">
           {icon}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CRMActivity({
+  icon,
+  title,
+  description,
+  time,
+  type
+}: {
+  icon: string
+  title: string
+  description: string
+  time: string
+  type: 'contact' | 'deal' | 'update' | 'lead' | 'issue'
+}) {
+  const typeColors = {
+    contact: 'bg-blue-100 border-blue-200 text-blue-800',
+    deal: 'bg-green-100 border-green-200 text-green-800',
+    update: 'bg-yellow-100 border-yellow-200 text-yellow-800',
+    lead: 'bg-purple-100 border-purple-200 text-purple-800',
+    issue: 'bg-red-100 border-red-200 text-red-800'
+  }
+
+  return (
+    <div className={`p-4 rounded-lg border ${typeColors[type]} hover:shadow-md transition-all duration-300`}>
+      <div className="flex items-start gap-3">
+        <span className="text-xl">{icon}</span>
+        <div className="flex-1">
+          <p className="font-semibold text-sm">{title}</p>
+          <p className="text-xs opacity-75 mt-1">{description}</p>
+          <p className="text-xs opacity-60 mt-2">{time}</p>
         </div>
       </div>
     </div>

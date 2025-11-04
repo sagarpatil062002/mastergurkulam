@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getCollection } from "@/lib/mongodb"
+import { sendEmail, generateHallTicketEmail } from "@/lib/email-service"
 import type { ExamRegistration, Exam } from "@/lib/db-models"
 import { ObjectId } from "mongodb"
 
@@ -39,6 +40,21 @@ export async function GET(request: NextRequest) {
     if (daysUntilExam > 7) {
       return NextResponse.json({ error: "Hall ticket will be available 7 days before exam" }, { status: 400 })
     }
+
+    // Send hall ticket via email
+    await sendEmail(
+      registration.email,
+      "Your Hall Ticket - Master's Gurukulam",
+      generateHallTicketEmail({
+        name: registration.name,
+        registrationNumber: registration.registrationNumber,
+        examTitle: exam.title,
+        examDate: new Date(exam.examDate).toLocaleDateString(),
+        center: registration.center,
+        language: registration.language,
+        email: registration.email,
+      }),
+    )
 
     return NextResponse.json({
       ...registration,

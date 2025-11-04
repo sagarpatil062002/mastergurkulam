@@ -28,6 +28,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const menuItems = [
     { label: "Dashboard", href: "/admin", icon: "🏠" },
+    { label: "Analytics", href: "/admin/analytics", icon: "📊" },
+    { label: "CRM", href: "/admin/crm", icon: "🤝" },
     { label: "Admin Users", href: "/admin/admin-users", icon: "👥" },
     { label: "Email Templates", href: "/admin/email-templates", icon: "📧" },
     { label: "Courses", href: "/admin/courses", icon: "📚" },
@@ -36,10 +38,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Testimonials", href: "/admin/testimonials", icon: "⭐" },
     { label: "Exams", href: "/admin/exams", icon: "📝" },
     { label: "Exam Registrations", href: "/admin/exam-registrations", icon: "📋" },
+    { label: "Exam Results", href: "/admin/exam-results", icon: "📈" },
     { label: "Grievances", href: "/admin/grievances", icon: "⚠️" },
     { label: "Activities", href: "/admin/activities", icon: "📸" },
     { label: "Videos", href: "/admin/videos", icon: "🎥" },
     { label: "Contacts", href: "/admin/contacts", icon: "📞" },
+    { label: "Notifications", href: "/admin/notifications", icon: "🔔" },
   ]
 
   return (
