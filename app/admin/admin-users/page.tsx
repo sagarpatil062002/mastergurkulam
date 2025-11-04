@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
     if (!editingUser) return
 
     try {
-      const updateData = {
+      const updateData: any = {
         name: formData.name,
         email: formData.email,
         role: formData.role,
@@ -153,6 +153,7 @@ export default function AdminUsersPage() {
       })
 
       if (response.ok) {
+        const data = await response.json()
         toast.success(`User ${!user.active ? 'activated' : 'deactivated'} successfully`)
         fetchUsers()
       } else {
@@ -312,29 +313,27 @@ export default function AdminUsersPage() {
                       >
                         {user.active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </Button>
-                      {user.role !== "super_admin" && (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete {user.name}? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteUser(user._id)}>
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete User</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete {user.name}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(user._id)}>
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

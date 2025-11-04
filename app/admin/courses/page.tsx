@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { Trash2, Edit2, Plus } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Trash2, Edit2, Plus, Search, SortAsc, SortDesc } from "lucide-react"
 import type { Course } from "@/lib/db-models"
 import AdminLayout from "@/components/AdminLayout"
 
@@ -18,6 +18,9 @@ export default function CoursesAdmin() {
     image: "",
     order: 1,
   })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<"title" | "duration" | "order">("order")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
   useEffect(() => {
     fetchCourses()
@@ -79,6 +82,51 @@ export default function CoursesAdmin() {
       }
     } catch (error) {
       console.error("Delete error:", error)
+    }
+  }
+
+  // Filtered and sorted courses
+  const filteredAndSortedCourses = useMemo(() => {
+    let filtered = courses.filter(course =>
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.duration.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any
+
+      switch (sortBy) {
+        case "title":
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case "duration":
+          aValue = a.duration.toLowerCase()
+          bValue = b.duration.toLowerCase()
+          break
+        case "order":
+          aValue = a.order
+          bValue = b.order
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [courses, searchTerm, sortBy, sortOrder])
+
+  const toggleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("asc")
     }
   }
 
@@ -184,9 +232,55 @@ export default function CoursesAdmin() {
 
       <div className="bg-white border-2 border-primary/20 rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-primary to-secondary text-white p-6">
-          <h3 className="text-xl font-bold">📋 Course List ({courses.length} courses)</h3>
+          <h3 className="text-xl font-bold">📋 Course List ({filteredAndSortedCourses.length} courses)</h3>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Search and Sort Controls */}
+        <div className="p-6 border-b border-gray-200 bg-gray-50">
+          <div className="space-y-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+
+            {/* Sort Options */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => toggleSort("title")}
+                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                  sortBy === "title" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Title {sortBy === "title" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+              </button>
+              <button
+                onClick={() => toggleSort("duration")}
+                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                  sortBy === "duration" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Duration {sortBy === "duration" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+              </button>
+              <button
+                onClick={() => toggleSort("order")}
+                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                  sortBy === "order" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Order {sortBy === "order" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto max-h-96 overflow-y-auto scrollbar-custom">
           <table className="w-full">
             <thead className="bg-primary/10 border-b-2 border-primary/20">
               <tr>
@@ -204,9 +298,7 @@ export default function CoursesAdmin() {
                   </td>
                 </tr>
               ) : (
-                courses
-                  .sort((a, b) => a.order - b.order)
-                  .map((course) => (
+                filteredAndSortedCourses.map((course) => (
                     <tr key={course._id?.toString()} className="border-b border-border hover:bg-primary/5 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">

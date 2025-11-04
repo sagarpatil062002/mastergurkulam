@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Trash2, Edit2 } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Trash2, Edit2, Search, SortAsc, SortDesc } from "lucide-react"
 import type { Contact } from "@/lib/db-models"
 import AdminLayout from "@/components/AdminLayout"
 
@@ -16,6 +16,9 @@ export default function ContactsAdmin() {
     type: "",
     message: "",
   })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [sortBy, setSortBy] = useState<"name" | "email" | "type" | "createdAt">("createdAt")
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   useEffect(() => {
     fetchContacts()
@@ -83,149 +86,276 @@ export default function ContactsAdmin() {
     setEditForm({ name: "", email: "", mobile: "", type: "", message: "" })
   }
 
+  // Filtered and sorted contacts
+  const filteredAndSortedContacts = useMemo(() => {
+    let filtered = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.message.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any
+
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase()
+          bValue = b.name.toLowerCase()
+          break
+        case "email":
+          aValue = a.email.toLowerCase()
+          bValue = b.email.toLowerCase()
+          break
+        case "type":
+          aValue = a.type || ""
+          bValue = b.type || ""
+          break
+        case "createdAt":
+          aValue = new Date(a.createdAt).getTime()
+          bValue = new Date(b.createdAt).getTime()
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+
+    return filtered
+  }, [contacts, searchTerm, sortBy, sortOrder])
+
+  const toggleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+    } else {
+      setSortBy(field)
+      setSortOrder("asc")
+    }
+  }
+
   return (
     <AdminLayout>
-      <div className="grid md:grid-cols-2 gap-6">
-      <div>
-        <h2 className="text-3xl font-bold mb-6">Contacts</h2>
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {contacts.map((contact) => (
-            <button
-              key={contact._id?.toString()}
-              onClick={() => setSelectedContact(contact)}
-              className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                selectedContact?._id === contact._id
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:border-primary"
-              }`}
-            >
-              <p className="font-semibold">{contact.name}</p>
-              <p className="text-sm text-muted-foreground">{contact.email}</p>
-              <p className="text-xs text-muted-foreground mt-1">{new Date(contact.createdAt).toLocaleDateString()}</p>
-            </button>
-          ))}
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800">Contact Messages</h2>
+          <p className="text-gray-600 mt-2">Manage and respond to contact inquiries</p>
         </div>
-      </div>
 
-      {selectedContact && (
-        <div className="bg-card border border-border rounded-lg p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xl font-bold">{selectedContact.name}</h3>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleEdit(selectedContact)}
-                className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition"
-                title="Edit Contact"
-              >
-                <Edit2 size={18} />
-              </button>
-              <button
-                onClick={() => handleDelete(selectedContact._id?.toString() || "")}
-                className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition"
-                title="Delete Contact"
-              >
-                <Trash2 size={18} />
-              </button>
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-2xl p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-800 mb-6">All Messages</h3>
+
+              {/* Search and Sort Controls */}
+              <div className="space-y-4 mb-6">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+
+                {/* Sort Options */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => toggleSort("name")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "name" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Name {sortBy === "name" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                  <button
+                    onClick={() => toggleSort("createdAt")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "createdAt" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Date {sortBy === "createdAt" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                  <button
+                    onClick={() => toggleSort("type")}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-lg transition-all ${
+                      sortBy === "type" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    Type {sortBy === "type" && (sortOrder === "asc" ? <SortAsc size={12} /> : <SortDesc size={12} />)}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-custom">
+                {filteredAndSortedContacts.map((contact) => (
+                  <button
+                    key={contact._id?.toString()}
+                    onClick={() => setSelectedContact(contact)}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
+                      selectedContact?._id === contact._id
+                        ? "border-primary bg-gradient-to-r from-primary/10 to-secondary/10 shadow-lg"
+                        : "border-gray-200 hover:border-primary hover:shadow-md bg-white"
+                    }`}
+                  >
+                    <p className="font-bold text-gray-900">{contact.name}</p>
+                    <p className="text-sm text-gray-600 truncate">{contact.email}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        contact.type === 'complaint' ? 'bg-red-100 text-red-800' :
+                        contact.type === 'admission' ? 'bg-blue-100 text-blue-800' :
+                        contact.type === 'feedback' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {contact.type || 'general'}
+                      </span>
+                      <p className="text-xs text-gray-500">{new Date(contact.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {isEditing ? (
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Name</label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full border border-border rounded-lg px-4 py-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Email</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  className="w-full border border-border rounded-lg px-4 py-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Mobile</label>
-                <input
-                  type="text"
-                  value={editForm.mobile}
-                  onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
-                  className="w-full border border-border rounded-lg px-4 py-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Type</label>
-                <select
-                  value={editForm.type}
-                  onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                  className="w-full border border-border rounded-lg px-4 py-2"
-                >
-                  <option value="general">General</option>
-                  <option value="admission">Admission</option>
-                  <option value="complaint">Complaint</option>
-                  <option value="feedback">Feedback</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Message</label>
-                <textarea
-                  value={editForm.message}
-                  onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
-                  rows={4}
-                  className="w-full border border-border rounded-lg px-4 py-2"
-                  required
-                />
-              </div>
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90"
-                >
-                  Update Contact
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCancelEdit}
-                  className="flex-1 bg-border text-foreground py-2 rounded-lg hover:bg-border/80"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-semibold">{selectedContact.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Mobile</p>
-                <p className="font-semibold">{selectedContact.mobile}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Type</p>
-                <p className="font-semibold capitalize">{selectedContact.type}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Message</p>
-                <p className="mt-2">{selectedContact.message}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Received</p>
-                <p className="font-semibold">{new Date(selectedContact.createdAt).toLocaleString()}</p>
+          {selectedContact && (
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl shadow-2xl p-8 border border-gray-100">
+                <div className="flex justify-between items-start mb-8">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-800">{selectedContact.name}</h3>
+                    <p className="text-gray-600 mt-1">Contact inquiry received</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleEdit(selectedContact)}
+                      className="p-3 hover:bg-blue-50 text-blue-600 rounded-lg transition-all duration-300 hover:shadow-md"
+                      title="Edit Contact"
+                    >
+                      <Edit2 size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(selectedContact._id?.toString() || "")}
+                      className="p-3 hover:bg-red-50 text-red-600 rounded-lg transition-all duration-300 hover:shadow-md"
+                      title="Delete Contact"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+
+                {isEditing ? (
+                  <form onSubmit={handleUpdate} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-bold mb-3 text-gray-700">Name</label>
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter full name"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold mb-3 text-gray-700">Email</label>
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter email address"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold mb-3 text-gray-700">Mobile</label>
+                        <input
+                          type="text"
+                          value={editForm.mobile}
+                          onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          placeholder="Enter mobile number"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold mb-3 text-gray-700">Type</label>
+                        <select
+                          value={editForm.type}
+                          onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                          className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                          title="Select contact type"
+                        >
+                          <option value="general">General</option>
+                          <option value="admission">Admission</option>
+                          <option value="complaint">Complaint</option>
+                          <option value="feedback">Feedback</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold mb-3 text-gray-700">Message</label>
+                      <textarea
+                        value={editForm.message}
+                        onChange={(e) => setEditForm({ ...editForm, message: e.target.value })}
+                        rows={6}
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        placeholder="Enter your message"
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-4 pt-6 border-t border-gray-200">
+                      <button
+                        type="submit"
+                        className="flex-1 bg-gradient-to-r from-primary to-secondary text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      >
+                        Update Contact
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="flex-1 bg-gray-200 text-gray-800 py-4 rounded-xl font-bold text-lg hover:bg-gray-300 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                        <p className="text-sm font-bold text-blue-700 mb-2">Email</p>
+                        <p className="font-bold text-lg text-blue-900">{selectedContact.email}</p>
+                      </div>
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+                        <p className="text-sm font-bold text-green-700 mb-2">Mobile</p>
+                        <p className="font-bold text-lg text-green-900">{selectedContact.mobile}</p>
+                      </div>
+                      <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                        <p className="text-sm font-bold text-purple-700 mb-2">Type</p>
+                        <p className="font-bold text-lg text-purple-900 capitalize">{selectedContact.type || 'general'}</p>
+                      </div>
+                      <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200">
+                        <p className="text-sm font-bold text-orange-700 mb-2">Received</p>
+                        <p className="font-bold text-lg text-orange-900">{new Date(selectedContact.createdAt).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl border border-gray-200">
+                      <p className="text-sm font-bold text-gray-700 mb-3">Message</p>
+                      <p className="text-gray-900 leading-relaxed text-lg">{selectedContact.message}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
-      )}
       </div>
     </AdminLayout>
   )

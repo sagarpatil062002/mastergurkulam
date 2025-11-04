@@ -7,11 +7,12 @@ import bcrypt from "bcryptjs"
 // GET - Fetch single admin user
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const adminUsers = await getCollection<AdminUser>("admin_users")
-    const user = await adminUsers.findOne({ _id: new ObjectId(params.id) })
+    const user = await adminUsers.findOne({ _id: new ObjectId(id) })
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -30,22 +31,24 @@ export async function GET(
 // PUT - Update admin user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { name, email, password, role, active } = await request.json()
+    const body = await request.json()
+    const { name, email, password, role, active } = body
+    const { id } = await params
 
     const adminUsers = await getCollection<AdminUser>("admin_users")
 
     // Check if user exists
-    const existingUser = await adminUsers.findOne({ _id: new ObjectId(params.id) })
+    const existingUser = await adminUsers.findOne({ _id: new ObjectId(id) })
     if (!existingUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Check if email is already taken by another user
     if (email !== existingUser.email) {
-      const emailExists = await adminUsers.findOne({ email, _id: { $ne: new ObjectId(params.id) } })
+      const emailExists = await adminUsers.findOne({ email, _id: { $ne: new ObjectId(id) } })
       if (emailExists) {
         return NextResponse.json({ error: "Email already taken" }, { status: 400 })
       }
@@ -65,7 +68,7 @@ export async function PUT(
     }
 
     const result = await adminUsers.updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: updateData }
     )
 
@@ -74,7 +77,7 @@ export async function PUT(
     }
 
     return NextResponse.json({
-      _id: params.id,
+      _id: id,
       name,
       email,
       role,
@@ -90,23 +93,24 @@ export async function PUT(
 // DELETE - Delete admin user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const adminUsers = await getCollection<AdminUser>("admin_users")
 
     // Check if user exists
-    const user = await adminUsers.findOne({ _id: new ObjectId(params.id) })
+    const user = await adminUsers.findOne({ _id: new ObjectId(id) })
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // Prevent deletion of super_admin users
-    if (user.role === "super_admin") {
-      return NextResponse.json({ error: "Cannot delete super admin user" }, { status: 400 })
-    }
+    // Allow deletion of all users (including super_admin)
+    // if (user.role === "super_admin") {
+    //   return NextResponse.json({ error: "Cannot delete super admin user" }, { status: 400 })
+    // }
 
-    const result = await adminUsers.deleteOne({ _id: new ObjectId(params.id) })
+    const result = await adminUsers.deleteOne({ _id: new ObjectId(id) })
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })

@@ -94,3 +94,118 @@ main {
 img {
   @apply max-w-full h-auto;
 }
+
+/* Custom animations and shadows */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out;
+}
+
+/* Enhanced shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+.shadow-4xl {
+  box-shadow: 0 45px 80px -15px rgba(0, 0, 0, 0.3);
+}
+
+/* Navbar glow effect */
+.navbar-glow {
+  box-shadow:
+    0 0 25px rgba(37, 99, 235, 0.15),
+    0 0 50px rgba(251, 146, 60, 0.1),
+    0 35px 60px -12px rgba(0, 0, 0, 0.3);
+}
+
+/* Performance optimizations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Custom scrollbar styling */
+.scrollbar-custom {
+  scrollbar-width: thin;  /* Firefox */
+  scrollbar-color: rgba(37, 99, 235, 0.3) transparent;  /* Firefox */
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;  /* Width of scrollbar */
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;  /* Track background */
+  border-radius: 10px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, rgba(37, 99, 235, 0.6), rgba(251, 146, 60, 0.6));  /* Thumb gradient */
+  border-radius: 10px;  /* Rounded corners */
+  border: 1px solid rgba(255, 255, 255, 0.2);  /* Subtle border */
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, rgba(37, 99, 235, 0.8), rgba(251, 146, 60, 0.8));  /* Darker on hover */
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
