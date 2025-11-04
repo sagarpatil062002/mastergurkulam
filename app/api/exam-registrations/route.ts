@@ -3,6 +3,7 @@ import { getCollection } from "@/lib/mongodb"
 import { sendEmail, generateExamConfirmationEmail } from "@/lib/email-service"
 import type { ExamRegistration, Exam } from "@/lib/db-models"
 import { ObjectId } from "mongodb"
+import { syncContactToCRM, createCRMDeal } from "@/lib/crm-integration"
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +55,35 @@ export async function POST(request: NextRequest) {
         email: formData.get("email") as string,
       }),
     )
+
+    // Sync to CRM if enabled
+    try {
+      const contactId = await syncContactToCRM({
+        email: formData.get("email") as string,
+        name: formData.get("name") as string,
+        mobile: formData.get("mobile") as string,
+        source: 'exam_registration',
+        examInterest: exam.title,
+        status: 'qualified',
+        notes: `Exam registration: ${exam.title}, Center: ${formData.get("center")}, Fee: ₹${exam.examFee}`
+      })
+
+      // Create deal for exam registration
+      if (contactId) {
+        await createCRMDeal({
+          title: `${exam.title} Registration - ${formData.get("name")}`,
+          contactId,
+          amount: exam.examFee,
+          currency: 'INR',
+          stage: 'qualified',
+          examType: exam.title,
+          closeDate: new Date(exam.examDate)
+        })
+      }
+    } catch (crmError) {
+      console.error('CRM sync error:', crmError)
+      // Don't fail registration if CRM sync fails
+    }
 
     return NextResponse.json({ _id: result.insertedId, registrationNumber }, { status: 201 })
   } catch (error) {

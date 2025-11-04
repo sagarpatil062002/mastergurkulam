@@ -8,6 +8,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import jsPDF from "jspdf"
 import html2canvas from "html2canvas"
+import { analytics } from "@/lib/analytics"
 
 function HallTicketContent() {
   const searchParams = useSearchParams()
@@ -41,40 +42,69 @@ function HallTicketContent() {
   }
 
   const downloadPDF = async () => {
-    const element = document.getElementById("hall-ticket-card")
-    if (!element) return
-
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      })
-
-      const imgData = canvas.toDataURL("image/png")
-      const pdf = new jsPDF("p", "mm", "a4")
-
-      const imgWidth = 210
-      const pageHeight = 295
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      let heightLeft = imgHeight
-
-      let position = 0
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
+      const element = document.getElementById("hall-ticket-card")
+      if (!element) {
+        alert("Hall ticket card not found. Please try again.")
+        return
       }
 
-      pdf.save(`hall-ticket-${registrationNumber}.pdf`)
+      analytics.trackDownload('pdf', `hall-ticket-${registrationNumber}.pdf`)
+
+      // Create a new window with the content
+      const printWindow = window.open('', '_blank', 'width=800,height=600')
+      if (!printWindow) {
+        alert("Please allow popups for this website to download PDF.")
+        return
+      }
+
+      // Copy styles
+      const styles = Array.from(document.styleSheets)
+        .map(styleSheet => {
+          try {
+            return Array.from(styleSheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('')
+          } catch (e) {
+            return ''
+          }
+        })
+        .join('')
+
+      const content = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Hall Ticket</title>
+            <style>${styles}</style>
+            <style>
+              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+              .print-only { display: block !important; }
+            </style>
+          </head>
+          <body>
+            ${element.outerHTML}
+          </body>
+        </html>
+      `
+
+      printWindow.document.write(content)
+      printWindow.document.close()
+
+      // Wait for content to load
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Use browser's print to PDF functionality
+      printWindow.print()
+
+      // Close window after a delay
+      setTimeout(() => {
+        printWindow.close()
+      }, 1000)
+
     } catch (error) {
       console.error("Error generating PDF:", error)
+      analytics.trackError('pdf_generation_failed', 'Failed to generate hall ticket PDF')
       alert("Error generating PDF. Please try again.")
     }
   }

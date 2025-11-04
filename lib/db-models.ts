@@ -80,6 +80,19 @@ export interface Exam {
   showResults: boolean
   registrationOpen: boolean
   active: boolean
+  faqs?: FAQ[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// FAQ Model
+export interface FAQ {
+  _id?: ObjectId
+  question: string
+  answer: string
+  examId?: ObjectId
+  order: number
+  active: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -188,6 +201,19 @@ export interface EmailTemplate {
   body: string
   type: "registration" | "confirmation" | "admission" | "grievance" | "admit_card" | "result"
   variables: string[] // e.g., ['name', 'email', 'registrationNumber']
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Notification Model
+export interface Notification {
+  _id?: ObjectId
+  title: string
+  message: string
+  type: "info" | "warning" | "success" | "error"
+  active: boolean
+  startDate: Date
+  endDate: Date
   createdAt: Date
   updatedAt: Date
 }

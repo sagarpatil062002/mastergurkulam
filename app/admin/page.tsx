@@ -213,6 +213,10 @@ function Nav() {
     { label: "Activities", href: "/admin/activities", icon: "📸" },
     { label: "Videos", href: "/admin/videos", icon: "🎥" },
     { label: "Contacts", href: "/admin/contacts", icon: "📞" },
+    { label: "FAQs", href: "/admin/faqs", icon: "❓" },
+    { label: "Notifications", href: "/admin/notifications", icon: "📢" },
+    { label: "Analytics", href: "/admin/analytics", icon: "📊" },
+    { label: "CRM Integration", href: "/admin/crm", icon: "🤝" },
   ]
 
   const handleWheel = (e: React.WheelEvent) => {

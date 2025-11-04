@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getCollection } from "@/lib/mongodb"
 import { sendEmail, generateConfirmationEmail } from "@/lib/email-service"
 import type { Contact } from "@/lib/db-models"
+import { syncContactToCRM, createCRMDeal } from "@/lib/crm-integration"
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +44,22 @@ export async function POST(request: NextRequest) {
        <p>Email: ${data.email}</p>
        <p>Mobile: ${data.mobile}</p>`,
     )
+
+    // Sync to CRM if enabled
+    try {
+      await syncContactToCRM({
+        email: data.email,
+        name: data.name,
+        mobile: data.mobile,
+        source: 'enquiry',
+        courseInterest: data.selectedCourse,
+        status: 'new',
+        notes: `Course enquiry: ${data.selectedCourse}`
+      })
+    } catch (crmError) {
+      console.error('CRM sync error:', crmError)
+      // Don't fail the enquiry if CRM sync fails
+    }
 
     return NextResponse.json({ _id: result.insertedId, registrationNumber }, { status: 201 })
   } catch (error) {

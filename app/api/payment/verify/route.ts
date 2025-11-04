@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update registration payment status
-    const registrations = await getCollection<ExamRegistration>("exam-registrations")
+    const registrations = await getCollection<ExamRegistration>("exam_registrations")
 
     const result = await registrations.updateOne(
       { _id: new ObjectId(registrationId) },

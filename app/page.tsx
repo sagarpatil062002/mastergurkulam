@@ -3,12 +3,14 @@
 import { useState, useEffect, Suspense } from "react"
 import dynamic from "next/dynamic"
 import type { Course, Facility, Testimonial } from "@/lib/db-models"
+import { analytics } from "@/lib/analytics"
 
 // Lazy load components
 const Header = dynamic(() => import("@/components/header"))
 const Footer = dynamic(() => import("@/components/footer"))
 const CourseCard = dynamic(() => import("@/components/course-card"))
 const TestimonialCard = dynamic(() => import("@/components/testimonial-card"))
+const NotificationBar = dynamic(() => import("@/components/notification-bar"))
 
 // Video Model for hero section
 interface Video {
@@ -59,6 +61,9 @@ export default function Home() {
   })
 
   useEffect(() => {
+    // Track page view
+    analytics.trackPageView('Home Page', 'landing')
+
     // Fetch courses
     fetch("/api/courses")
       .then((res) => res.json())
@@ -90,6 +95,7 @@ export default function Home() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.altKey && e.key === 'a') {
         e.preventDefault()
+        analytics.trackInteraction('admin_access', 'navigation', 'keyboard_shortcut')
         window.location.href = '/admin?access=admin2024'
       }
     }
@@ -99,6 +105,7 @@ export default function Home() {
   }, [])
 
   const handleApplyCourse = (course: Course) => {
+    analytics.trackInteraction('apply_course', 'courses', course.title)
     setSelectedCourse(course)
     setFormData({ ...formData, selectedCourse: course.title })
     setShowEnquiryForm(true)
@@ -113,18 +120,26 @@ export default function Home() {
         body: JSON.stringify(formData),
       })
       if (response.ok) {
+        analytics.trackFormSubmit('course_enquiry', {
+          course: formData.selectedCourse,
+          enquiry_type: 'course_application'
+        })
         alert("Thank you! We will contact you soon.")
         setShowEnquiryForm(false)
         setFormData({ name: "", email: "", mobile: "", selectedCourse: "" })
       }
     } catch (error) {
       console.error("Enquiry submission error:", error)
+      analytics.trackError('enquiry_submission_failed', 'Failed to submit course enquiry')
       alert("Failed to submit enquiry")
     }
   }
 
   return (
     <div className="min-h-screen flex flex-col pb-24 md:pb-0">
+      <Suspense fallback={<div className="h-16 bg-white shadow-sm animate-pulse" />}>
+        <NotificationBar />
+      </Suspense>
       <Suspense fallback={<div className="h-16 bg-white shadow-sm animate-pulse" />}>
         <Header />
       </Suspense>

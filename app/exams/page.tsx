@@ -6,7 +6,8 @@ import { useState, useEffect } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import Recaptcha from "@/components/recaptcha"
-import type { Exam } from "@/lib/db-models"
+import type { Exam, FAQ } from "@/lib/db-models"
+import { analytics } from "@/lib/analytics"
 
 // Razorpay types
 declare global {
@@ -19,9 +20,11 @@ export default function ExamsPage() {
   const [exams, setExams] = useState<Exam[]>([])
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null)
   const [showRegistrationForm, setShowRegistrationForm] = useState(false)
-  const [activeTab, setActiveTab] = useState<"register" | "results" | "grievance" | "hallticket">("register")
+  const [activeTab, setActiveTab] = useState<"register" | "results" | "grievance" | "hallticket" | "faqs">("register")
 
   useEffect(() => {
+    analytics.trackPageView('Exams Page', 'exams')
+
     fetch("/api/exams")
       .then((res) => res.json())
       .then((data) => {
@@ -36,6 +39,15 @@ export default function ExamsPage() {
     script.async = true
     document.body.appendChild(script)
   }, [])
+
+  useEffect(() => {
+    if (selectedExam?._id) {
+      fetch(`/api/faqs?examId=${selectedExam._id}`)
+        .then((res) => res.json())
+        .then((data) => setFaqs(data))
+        .catch(console.error)
+    }
+  }, [selectedExam])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -93,6 +105,16 @@ export default function ExamsPage() {
             >
               ⚠️ File Grievance
             </button>
+            <button
+              onClick={() => setActiveTab("faqs")}
+              className={`py-4 px-4 font-semibold border-b-2 transition ${
+                activeTab === "faqs"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              ❓ FAQs
+            </button>
           </div>
         </div>
       </section>
@@ -103,6 +125,7 @@ export default function ExamsPage() {
           {activeTab === "results" && <CheckResults />}
           {activeTab === "hallticket" && <DownloadHallTicket />}
           {activeTab === "grievance" && <FileGrievance />}
+          {activeTab === "faqs" && <ExamFAQs exams={exams} />}
         </div>
       </section>
 
@@ -113,6 +136,7 @@ export default function ExamsPage() {
 
 function ExamRegistration({ exams }: { exams: Exam[] }) {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(exams[0] || null)
+  const [faqs, setFaqs] = useState<FAQ[]>([])
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -199,9 +223,11 @@ function ExamRegistration({ exams }: { exams: Exam[] }) {
                 })
 
                 if (verifyResponse.ok) {
+                  analytics.trackExamRegistration(response.razorpay_order_id, selectedExam.title, 'gateway')
                   // Redirect to success page
                   window.location.href = `/exams/registration-success?reg=${result.registrationNumber}&payment=success`
                 } else {
+                  analytics.trackError('payment_verification_failed', 'Payment verification failed for exam registration')
                   alert("Payment verification failed. Please contact support.")
                 }
               },
@@ -742,6 +768,80 @@ function FileGrievance() {
           {loading ? "📤 Submitting..." : "📤 Submit Grievance"}
         </button>
       </form>
+    </div>
+  )
+}
+
+function ExamFAQs({ exams }: { exams: Exam[] }) {
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(exams[0] || null)
+  const [faqs, setFaqs] = useState<FAQ[]>([])
+  const [expandedFAQ, setExpandedFAQ] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (selectedExam?._id) {
+      fetch(`/api/faqs?examId=${selectedExam._id}`)
+        .then((res) => res.json())
+        .then((data) => setFaqs(data))
+        .catch(console.error)
+    }
+  }, [selectedExam])
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-4xl font-bold mb-12 text-center text-primary">Frequently Asked Questions</h2>
+
+      {/* Exam Selector */}
+      <div className="mb-8">
+        <label className="block text-lg font-bold mb-4 text-primary">Select Exam</label>
+        <select
+          value={selectedExam?._id?.toString() || ""}
+          onChange={(e) => {
+            const exam = exams.find(ex => ex._id?.toString() === e.target.value)
+            setSelectedExam(exam || null)
+          }}
+          className="w-full border-2 border-border rounded-xl px-6 py-4 text-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+        >
+          {exams.map((exam) => (
+            <option key={exam._id?.toString()} value={exam._id?.toString()}>
+              {exam.title}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* FAQs List */}
+      {faqs.length === 0 ? (
+        <div className="text-center text-muted-foreground py-12">
+          <div className="text-6xl mb-4">❓</div>
+          <h3 className="text-2xl font-bold mb-2">No FAQs Available</h3>
+          <p>FAQs for this exam will be available soon.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {faqs.map((faq) => (
+            <div key={faq._id?.toString()} className="bg-white border border-border rounded-xl shadow-lg overflow-hidden">
+              <button
+                onClick={() => setExpandedFAQ(expandedFAQ === faq._id?.toString() ? null : faq._id?.toString() || null)}
+                className="w-full text-left p-6 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-primary pr-4">{faq.question}</h3>
+                  <span className="text-2xl text-primary flex-shrink-0">
+                    {expandedFAQ === faq._id?.toString() ? "−" : "+"}
+                  </span>
+                </div>
+              </button>
+              {expandedFAQ === faq._id?.toString() && (
+                <div className="px-6 pb-6">
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
